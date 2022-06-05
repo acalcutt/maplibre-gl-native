@@ -23,7 +23,7 @@ namespace {
 // the viewport for collision detection so that the bulk of the changes
 // occur offscreen. Making this constant greater increases label
 // stability, but it's expensive.
-const float viewportPaddingDefault = 100;
+const float viewportPaddingDefault = 1024;
 // Viewport padding must be much larger for static tiles to avoid clipped labels.
 const float viewportPaddingForStaticTiles = 1024;
 
