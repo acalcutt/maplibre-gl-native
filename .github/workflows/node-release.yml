@@ -167,10 +167,18 @@ jobs:
         env:
           NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
-      - name: Publish to NPM
-        if: matrix.os == 'ubuntu-20.04' && matrix.node == '16' && github.ref == 'refs/heads/main'
+      - name: Publish to NPM (release)
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '16' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to NPM (prerelease)
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '16' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        run: |
+          npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
+          npm publish --tag next --access public
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
