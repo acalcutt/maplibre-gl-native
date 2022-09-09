@@ -45,9 +45,7 @@ jobs:
         os:
           - macos-12
           - ubuntu-20.04
-        include:
-          - os: macos-12
-            arch: arm64
+        arch: [arm64, x86_64]
     runs-on: ${{ matrix.os }}
     needs: bump_version
     env:
