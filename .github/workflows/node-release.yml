@@ -42,11 +42,10 @@ jobs:
   build:
     strategy:
       matrix:
-        os:
-          - macos-12
-          - ubuntu-20.04
-        arch: [arm64, x86_64]
-    runs-on: ${{ matrix.os }}
+        config:
+          - { os: ubuntu-20.04, arch: x86_64 }
+          - { os: macos-12, arch: x86_64}
+          - { os: macos-12, arch: arm64}
     needs: bump_version
     continue-on-error: true
     env:
