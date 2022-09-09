@@ -40,17 +40,15 @@ jobs:
           npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
           git push
   build:
-    runs-on: ${{ matrix.runs-on }}
     strategy:
-      fail-fast: false
       matrix:
+        os:
+          - macos-11.0
+          - ubuntu-20.04
         include:
-          - runs-on: ubuntu-20.04
-            arch: x86_64
-          - runs-on: macos-12
-            arch: x86_64
-          - runs-on: macos-12
+          - os: macos-12
             arch: arm64
+    runs-on: ${{ matrix.os }}
     needs: bump_version
     continue-on-error: true
     env:
@@ -145,7 +143,14 @@ jobs:
           ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
-        if: runner.os == 'macOS'
+        if: runner.os == 'MacOS' && matrix.arch == 'arm64'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
+          sed -i -e 's/$(ARCHS_STANDARD)/arm64/g' build/build.ninja
+          sed -i -e 's/-arch arm64e/-arch arm64/g' build/build.ninja
+
+      - name: CMake
+        if: runner.os == 'MacOS' && matrix.arch != 'arm64'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
 
