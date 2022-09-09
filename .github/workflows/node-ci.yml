@@ -76,10 +76,10 @@ jobs:
         os:
           - macos-12
           - ubuntu-20.04
-        node: [ 10, 14, 16, 18 ]
-    name: OS ${{ matrix.os }} Node ${{ matrix.node }}
+        include:
+          - os: macos-12
+            arch: arm64
     runs-on: ${{ matrix.os }}
-    continue-on-error: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
@@ -95,17 +95,30 @@ jobs:
           fetch-depth: 0
 
       - name: Install dependencies
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && matrix.arch != 'arm64'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list cmake || brew install cmake
-          brew list ccache || brew install ccache
-          brew list ninja || brew install ninja
-          brew list pkg-config || brew install pkg-config
-          brew list glfw3 || brew install glfw3
-          brew list libuv || brew install libuv
+          brew list cmake || brew install -q cmake
+          brew list ccache || brew install -q ccache
+          brew list ninja || brew install -q ninja
+          brew list pkg-config || brew install -q pkg-config
+          brew list glfw3 || brew install -q glfw3
+          brew list libuv || brew install -q libuv
+
+      - name: Install dependencies
+        if: runner.os == 'macOS' && matrix.arch == 'arm64'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: 1
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+        run: |
+          brew info cmake |grep Poured || brew install -q cmake
+          brew info ccache |grep Poured || brew install -q ccache
+          brew info ninja |grep Poured || brew install -q ninja
+          brew info pkg-config |grep Poured || brew install -q pkg-config
+          brew info libuv |grep Poured || brew install -q libuv
+          ./scripts/brew-install-arm64.sh glfw
 
       - name: Install dependencies
         if: runner.os == 'Linux'
@@ -126,11 +139,6 @@ jobs:
             libc++-9-dev \
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
-          
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node }}
 
       - name: npm ci
         run: npm ci --ignore-scripts
@@ -186,7 +194,7 @@ jobs:
         run: xvfb-run --auto-servernum npm test
 
       - name: Test
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && matrix.arch != 'arm64'
         run: npm test
 
       # On PRs make sure that the npm package can be packaged.
@@ -194,5 +202,3 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
-
-
