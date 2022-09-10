@@ -101,7 +101,6 @@ jobs:
           brew info ccache |grep Poured || brew install -q ccache
           brew info ninja |grep Poured || brew install -q ninja
           brew info pkg-config |grep Poured || brew install -q pkg-config
-          brew list glfw |grep Poured || brew install glfw
           brew info libuv |grep Poured || brew install -q libuv
           ./scripts/brew-install-arm64.sh glfw
 
