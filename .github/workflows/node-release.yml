@@ -27,7 +27,7 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-          token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+          token: ${{ secrets.CR_PAT }}
 
       - name: Setup node
         uses: actions/setup-node@v3
@@ -40,16 +40,16 @@ jobs:
           git config user.email github-actions@github.com
           npm version ${{ github.event.inputs.version }} --preid pre -m "Update node version to (${{ github.event.inputs.version }})"
           git push
+
   build:
-    runs-on: ${{ matrix.runs-on }}
     strategy:
-      fail-fast: false
       matrix:
-        include:
-          - runs-on: ubuntu-20.04
-            arch: x86_64
-          - runs-on: macos-12
-            arch: x86_64
+        os:
+          - macos-12
+          - ubuntu-20.04
+        node: [ 10, 14, 16, 18 ]
+    name: OS ${{ matrix.os }} Node ${{ matrix.node }}
+    runs-on: ${{ matrix.os }}
     needs: bump_version
     continue-on-error: true
     env:
@@ -69,41 +69,20 @@ jobs:
       - name: Get Latest Version
         run: git pull
 
-      - name: Get OS Info
-        run: uname -m
-
-      - name: Setup node
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Install dependencies macOS
-        if: runner.os == 'macOS' && matrix.arch != 'arm64'
+      - name: Install dependencies
+        if: runner.os == 'macOS'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
         run: |
-          brew list cmake || brew install -q cmake
-          brew list ccache || brew install -q ccache
-          brew list ninja || brew install -q ninja
-          brew list pkg-config || brew install -q pkg-config
-          brew list glfw || brew install glfw
-          brew list libuv || brew install -q libuv
+          brew list cmake || brew install cmake
+          brew list ccache || brew install ccache
+          brew list ninja || brew install ninja
+          brew list pkg-config || brew install pkg-config
+          brew list glfw3 || brew install glfw3
+          brew list libuv || brew install libuv
 
-      - name: Install dependencies macOS arm64
-        if: runner.os == 'macOS' && matrix.arch == 'arm64'
-        env:
-          HOMEBREW_NO_AUTO_UPDATE: 1
-          HOMEBREW_NO_INSTALL_CLEANUP: 1
-        run: |
-          brew info cmake |grep Poured || brew install -q cmake
-          brew info ccache |grep Poured || brew install -q ccache
-          brew info ninja |grep Poured || brew install -q ninja
-          brew info pkg-config |grep Poured || brew install -q pkg-config
-          brew info libuv |grep Poured || brew install -q libuv
-          ./scripts/brew-install-arm64.sh glfw
-
-      - name: Install dependencies Linux
+      - name: Install dependencies
         if: runner.os == 'Linux'
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -122,6 +101,11 @@ jobs:
             libc++-9-dev \
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
+          
+      - name: Setup node
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
 
       - name: npm ci
         run: npm ci --ignore-scripts
@@ -130,7 +114,7 @@ jobs:
         run: ccache --clear --set-config cache_dir=~/.ccache
 
       - name: Cache ccache
-        uses: actions/cache@v3
+        uses: actions/cache@v2
         env:
           cache-name: ccache-v1
         with:
@@ -148,16 +132,11 @@ jobs:
           ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
-        if: runner.os == 'MacOS' && matrix.arch == 'arm64'
-        run: |
-          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON -DCMAKE_OSX_ARCHITECTURES=arm64
-          sed -i -e 's/$(ARCHS_STANDARD)/arm64/g' build/build.ninja
-          sed -i -e 's/-arch arm64e/-arch arm64/g' build/build.ninja
-
-      - name: CMake
-        if: runner.os == 'MacOS' && matrix.arch != 'arm64'
+        if: runner.os == 'macOS'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DMBGL_WITH_COVERAGE=ON
+          sed -i -e 's/$(ARCHS_STANDARD)/x86_64/g' build/build.ninja
+          sed -i -e 's/-arch arm64e/-arch x86_64/g' build/build.ninja
 
       - name: CMake
         if: runner.os == 'Linux'
@@ -168,61 +147,40 @@ jobs:
         run: |
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
-      #- name: Run render tests on macOS
-      #  if: runner.os == 'macOS'
-      #  run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
+      - name: Test
+        if: runner.os == 'Linux'
+        run: xvfb-run --auto-servernum npm test
 
-      #- name: Upload render test artifacts
-      #  uses: actions/upload-artifact@v3
-      #  if: always()
-      #  with:
-      #    name: render-query-test-results
-      #    path: metrics/macos-xcode11-release-style.html
+      - name: Test
+        if: runner.os == 'macOS'
+        run: npm test
 
-      #- name: Test
-      #  if: runner.os == 'Linux'
-      #  run: xvfb-run --auto-servernum npm test
-
-      #- name: Test
-      #  if: runner.os == 'macOS' && matrix.arch != 'arm64'
-      #  run: npm test
-
-      # On PRs make sure that the npm package can be packaged.
-      #- name: Pack
-      #  if: github.ref != 'refs/heads/main'
-      #  run: |
-      #    npm pack --dry-run
-
-      - name: Publish X64 Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch == 'x86_64'
-        env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+      - name: Pack
+        if: github.ref != 'refs/heads/main'
         run: |
-          ./platform/node/scripts/publish.sh
+          npm pack --dry-run
 
-      - name: Publish ARM Release to Github
-        if: github.ref == 'refs/heads/main' && matrix.arch == 'arm64'
-        env:
-          PUBLISH: true
-          BUILDTYPE: RelWithDebInfo
-          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+      - name: Publish Release to Github
+        if: github.ref == 'refs/heads/main'
         run: |
-          ./platform/node/scripts/publish.sh --target_arch=arm64
+          npm run package
+          npm run release
+        env:
+          NODE_PRE_GYP_GITHUB_TOKEN: ${{ secrets.CR_PAT }}
 
       - name: Publish to NPM (release)
-        if: matrix.os == 'ubuntu-20.04' && matrix.arch == 'x86_64' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: matrix.os == 'ubuntu-20.04' && matrix.arch == 'x86_64' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        if: matrix.os == 'ubuntu-20.04' && matrix.node == '18' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
+
