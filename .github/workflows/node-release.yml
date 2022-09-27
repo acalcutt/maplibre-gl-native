@@ -42,7 +42,7 @@ jobs:
           git push
 
       - name: Publish to NPM (release)
-        if: matrix.runs-on == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
@@ -50,7 +50,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: matrix.runs-on == 'ubuntu-20.04' && github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        if: github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
@@ -67,6 +67,8 @@ jobs:
             arch: x86_64
           - runs-on: macos-12
             arch: x86_64
+          - runs-on: macos-12-arm
+            arch: arm64
     needs: bump_version
     continue-on-error: true
     env:
