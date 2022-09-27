@@ -8,7 +8,9 @@ on:
         required: true
         type: choice
         options:
-          - prerelease 
+          - prerelease
+          - preminor
+          - premajor
           - patch
           - minor
           - major
