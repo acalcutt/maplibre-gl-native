@@ -25,7 +25,6 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0
           token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
@@ -204,9 +203,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0
-          token: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
 
       - name: Get Latest Version
         run: git pull
