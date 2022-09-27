@@ -33,13 +33,18 @@ jobs:
         with:
           node-version: 18
 
+      - name: Read Node.js version to install from `.tool-versions`
+        id: npmversion
+        run: >-
+          echo "::set-output name=NPM_VERSION::$(
+            npm version ${{ github.event.inputs.version }} --preid pre
+          )"
+
       - name: Bump Version
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          ReleaseVersion=$(npm version ${{ github.event.inputs.version }} --preid pre)
-          echo $ReleaseVersion
-          git commit -m "Update node version to $ReleaseVersion"
+          git commit -m "Update node version to ${{ steps.npmversion.outputs.NPM_VERSION }}"
           git push
 
   publish_binaries:
