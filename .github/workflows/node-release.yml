@@ -8,7 +8,7 @@ on:
         required: true
         type: choice
         options:
-          - prerelease
+          - prepatch
           - preminor
           - premajor
           - patch
@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Bump npm version
+      - name: npm version
         id: npmversion
         run: >-
           echo "::set-output name=NPM_VERSION::$(
@@ -46,7 +46,7 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-          git commit -a -m "Update node version to ${{ steps.npmversion.outputs.NPM_VERSION }}"
+          git commit -a -m "Update node version to ${{ steps.npmversion.outputs.NPM_VERSION }} (${{ github.event.inputs.version }})"
           git push
 
   publish_binaries:
@@ -144,8 +144,14 @@ jobs:
           ccache --show-stats --set-config cache_dir=~/.ccache
 
       - name: CMake
+        if: runner.os == 'MacOS'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+
+      - name: CMake
+        if: runner.os == 'Linux'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
 
       - name: Build
         run: |
@@ -217,7 +223,7 @@ jobs:
           node-version: 18
 
       - name: Publish to NPM (release)
-        if: github.ref == 'refs/heads/main' && github.event.inputs.version != 'prerelease'
+        if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'patch' || github.event.inputs.version == 'minor' || github.event.inputs.version == 'major')
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
@@ -225,7 +231,7 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to NPM (prerelease)
-        if: github.ref == 'refs/heads/main' && github.event.inputs.version == 'prerelease'
+        if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'prepatch' || github.event.inputs.version == 'preminor' || github.event.inputs.version == 'premajor')
         run: |
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
