@@ -192,7 +192,7 @@ jobs:
         run: xvfb-run --auto-servernum npm test
 
       - name: Test
-        if: runner.os == 'macOS' && matrix.arch != 'arm64'
+        if: runner.os == 'macOS'
         run: npm test
 
       # On PRs make sure that the npm package can be packaged.
@@ -200,3 +200,34 @@ jobs:
         if: github.ref != 'refs/heads/main'
         run: |
           npm pack --dry-run
+          
+  test_linux_arm:
+    runs-on: ubuntu-latest
+    name: test (ubuntu-20.04, arm64)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'arm64,arm'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/arm64
+          file: platform/node/scripts/Dockerfile_Build
+          tags: build
+          push: false
+          load: true
+
+      - name: Run the Docker image
+        run:  docker run --rm -v $(pwd):/data build
