@@ -239,9 +239,10 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-  build_linux_arm:
+  publish_linux_arm64:
     runs-on: ubuntu-latest
     needs: bump_version
+    name: publish (ubuntu-20.04, arm64)
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -271,7 +272,7 @@ jobs:
           load: true
 
       - name: Run the Docker image
-        run:  docker run --rm -v $(pwd):/data -p 8080:80 build
+        run:  docker run --rm -v $(pwd):/data build
 
       - name: Setup node
         uses: actions/setup-node@v3
