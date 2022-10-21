@@ -54,7 +54,7 @@ jobs:
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish to NPM (prerelease)
         if: github.ref == 'refs/heads/main' && (github.event.inputs.version == 'prerelease' || github.event.inputs.version == 'prepatch' || github.event.inputs.version == 'preminor' || github.event.inputs.version == 'premajor')
@@ -62,4 +62,4 @@ jobs:
           npm config set //registry.npmjs.org/:_authToken ${NPM_TOKEN}
           npm publish --tag next --access public
         env:
-          NPM_TOKEN: ${{ secrets.NPM_ORG_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
