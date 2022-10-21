@@ -1,5 +1,5 @@
 {
-  "name": "@maplibre/maplibre-gl-native",
+  "name": "@acalcutt/maplibre-gl-native-bftest",
   "version": "5.0.1-pre.6",
   "description": "Renders map tiles with Maplibre GL",
   "keywords": [
@@ -68,7 +68,7 @@
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
     "host": "https://github.com/maplibre/maplibre-gl-native/releases/download/",
-    "remote_path": "node-v{version}",
+    "remote_path": "test-v{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }
