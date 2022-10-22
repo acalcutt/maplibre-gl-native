@@ -6,12 +6,6 @@
     "maplibre",
     "gl"
   ],
-  "directories": {
-    "lib": "lib"
-  },
-  "files": [
-    "lib"
-  ],
   "main": "platform/node/index.js",
   "repository": {
     "type": "git",
