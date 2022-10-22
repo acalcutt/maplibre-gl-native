@@ -170,7 +170,7 @@ jobs:
           npm pack --dry-run
           
   test_linux_arm:
-    runs-on: macos-12-arm
+    runs-on: ubuntu-20.04
     name: test (ubuntu-20.04, arm64)
     steps:
       - name: Checkout
