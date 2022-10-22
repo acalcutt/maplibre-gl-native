@@ -22,6 +22,7 @@
     "@mapbox/cmake-node-module": "^1.2.0",
     "@acalcutt/node-pre-gyp": "^1.0.11",
     "@acalcutt/node-pre-gyp-github": "1.4.8",
+    "cmake-js": "^7.0.0",
     "minimatch": "^5.1.0",
     "npm-run-all": "^4.0.2"
   },
@@ -56,7 +57,7 @@
     "node": ">=6"
   },
   "scripts": {
-    "install": "node-pre-gyp install --fallback-to-build=true",
+    "install": "node-pre-gyp install --fallback-to-build=false || cmake-js compile",
     "test": "tape platform/node/test/js/**/*.test.js",
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",
