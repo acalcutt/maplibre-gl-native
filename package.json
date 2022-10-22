@@ -62,8 +62,8 @@
   "binary": {
     "module_name": "mbgl",
     "module_path": "./lib/{node_abi}",
-    "host": "https://github.com/maplibre/maplibre-gl-native/releases/download/",
-    "remote_path": "test-v{version}",
+    "host": "https://github.com/acalcutt/maplibre-gl-native/releases/download/",
+    "remote_path": "node-v{version}",
     "package_name": "{node_abi}-{platform}-{arch}-{configuration}.tar.gz"
   }
 }
