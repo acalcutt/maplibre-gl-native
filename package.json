@@ -52,7 +52,7 @@
   },
   "scripts": {
     "install": "node-pre-gyp install --fallback-to-build=false || cmake-js compile",
-    "build": "cmake-js compile",
+    "build": "npm i --ignore-scripts && cmake-js compile",
     "test": "tape platform/node/test/js/**/*.test.js",
     "test-memory": "node --expose-gc platform/node/test/memory.test.js",
     "test-expressions": "node -r esm platform/node/test/expression.test.js",

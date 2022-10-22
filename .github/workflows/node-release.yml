@@ -117,11 +117,11 @@ jobs:
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
 
-      - name: npm ci
-        run: npm ci --ignore-scripts
-
       - name: npm build
         run: npm run build
+
+      - name: npm install
+        run: npm install
 
       #- name: Run render tests on macOS
       #  if: runner.os == 'macOS'
