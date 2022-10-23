@@ -6,7 +6,6 @@ uname -m
 
 cd /usr/src/app
 npm run build
-npm install
 cp -R ./lib/ /data/lib/
 
 xvfb-run --auto-servernum ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
