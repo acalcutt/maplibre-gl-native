@@ -7,6 +7,20 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 ### ✨ Features and improvements
 
 * Add your pull request...
+
+### 🐞 Bug fixes
+
+* Catches NaN for onMove event ([621](https://github.com/maplibre/maplibre-gl-native/pull/621))
+
+### ⛵ Dependencies
+
+* Add your pull request...
+* Revert "Revert "Gradle update"" - Update Gradle from v3 to v7 ([#619](https://github.com/maplibre/maplibre-gl-native/pull/619))
+
+## 9.6.0 - December 18, 2022
+
+### ✨ Features and improvements
+
 * Add missing header guards ([#543](https://github.com/maplibre/maplibre-gl-native/pull/543))
 * Removing unused versions sdk ([#515](https://github.com/maplibre/maplibre-gl-native/pull/515))
 * (tag: node-v5.0.1-pre.0) Upgrade libs and remove Jetifier ([#218](https://github.com/maplibre/maplibre-gl-native/pull/218))
@@ -26,7 +40,6 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### 🐞 Bug fixes
 
-* Add your pull request...
 * Fixes potential NaN when calling `NativeMapView::nativeMoveBy` ([#501](https://github.com/maplibre/maplibre-gl-native/pull/501))
 * Fix android ci workflows ([#476](https://github.com/maplibre/maplibre-gl-native/pull/476))
 * Fix typo in geo.cpp ([#412](https://github.com/maplibre/maplibre-gl-native/pull/412))
@@ -37,7 +50,6 @@ MapLibre welcomes participation and contributions from everyone. Please read [`C
 
 ### ⛵ Dependencies
 
-* Add your pull request...
 * Bump semver from 7.3.7 to 7.3.8 in /platform/android ([#530](https://github.com/maplibre/maplibre-gl-native/pull/530))
 * Bump to JDK 11 in android CI and generate Gradle Wrapper ([#474](https://github.com/maplibre/maplibre-gl-native/pull/474))
 * Bump ejs from 3.1.7 to 3.1.8 in /platform/android ([#470](https://github.com/maplibre/maplibre-gl-native/pull/470))
