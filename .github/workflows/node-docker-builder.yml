@@ -1,0 +1,38 @@
+name: node-builder-docker-image
+on:
+  workflow_dispatch
+jobs:
+  push_to_registry:
+    name: Docker image node-builder
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: 'arm64'
+
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to ghcr.io
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.NODE_PRE_GYP_GITHUB_TOKEN }}
+
+      - name: Build and push node-builder image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/arm64
+          file: platform/node/scripts/Dockerfile_Build
+          tags: ghcr.io/acalcutt/node-builder:latest
+          push: true
