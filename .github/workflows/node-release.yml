@@ -224,18 +224,21 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Create the docker build image
-        uses: docker/build-push-action@v3
-        with:
-          context: .
-          platforms: linux/arm64
-          file: platform/node/scripts/Dockerfile_Build
-          tags: build
-          push: false
-          load: true
+#      - name: Create the docker build image
+#        uses: docker/build-push-action@v3
+#        with:
+#          context: .
+#          platforms: linux/arm64
+#          file: platform/node/scripts/Dockerfile_Build
+#          tags: build
+#          push: false
+#          load: true
+#
+#      - name: Run the docker build image and create node libs
+#        run:  docker run --rm -v $(pwd):/data build
 
       - name: Run the docker build image and create node libs
-        run:  docker run --rm -v $(pwd):/data build
+        run:  docker run --rm -v $(pwd):/data ghcr.io/acalcutt/node-builder:latest
 
       - name: Setup node
         uses: actions/setup-node@v3
