@@ -54,9 +54,6 @@ const GeometryCollection& VectorTileFeature::getGeometries() const {
             lines = fixupPolygons(*lines);
         }
     }
-    catch(...) {
-        lines = GeometryCollection();
-    }
     return *lines;
 }
 
