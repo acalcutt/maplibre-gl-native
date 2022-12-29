@@ -25,11 +25,9 @@ RUN set -ex; \
     wget -qO- https://deb.nodesource.com/setup_18.x | bash; \
     apt-get install -y nodejs;
 
-RUN mkdir -p /data
 VOLUME /data
-WORKDIR /data
 
 RUN mkdir -p /usr/src/app
-COPY /platform/node/scripts/docker_build_entrypoint.sh /usr/src/app/docker_build_entrypoint.sh
-ENTRYPOINT ["/usr/src/app/docker_build_entrypoint.sh"]
-RUN ["chmod", "+x", "/usr/src/app/docker_build_entrypoint.sh"]
+COPY / /usr/src/app
+ENTRYPOINT ["/usr/src/app/platform/node/scripts/docker_build_entrypoint.sh"]
+RUN ["chmod", "+x", "/usr/src/app/platform/node/scripts/docker_build_entrypoint.sh"]
