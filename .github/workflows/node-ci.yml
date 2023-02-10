@@ -62,6 +62,8 @@ jobs:
             arch: x86_64
           - runs-on: macos-12-arm
             arch: arm64
+          - runs-on: windows-2022
+            arch: x86_64
     continue-on-error: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
@@ -122,9 +124,11 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Prepare ccache
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: ccache --clear --set-config cache_dir=~/.ccache
 
       - name: Cache ccache
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
         uses: actions/cache@v3
         env:
           cache-name: ccache-v1
@@ -137,30 +141,43 @@ jobs:
             ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}
 
       - name: Clear ccache statistics
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
           ccache --zero-stats --set-config cache_dir=~/.ccache
           ccache --max-size=2G --set-config cache_dir=~/.ccache
           ccache --show-stats --set-config cache_dir=~/.ccache
 
-      - name: CMake
+      - name: CMake macOS
         if: runner.os == 'MacOS'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
-      - name: CMake
+      - name: CMake Linux
         if: runner.os == 'Linux'
         run: |
           cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
 
-      - name: Build
+      - name: CMake Windows
+        if: runner.os == 'Windows'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+
+      - name: Build MacOS/Linux
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: |
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+
+      - name: Build Windows
+        if: runner.os == 'Windows'
+        run: |
+          cmake --build build
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
         run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts
+        if: runner.os == 'macOS'
         uses: actions/upload-artifact@v3
         if: always()
         with:
@@ -172,7 +189,7 @@ jobs:
         run: xvfb-run --auto-servernum npm test
 
       - name: Test
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' || runner.os == 'Windows'
         run: npm test
 
       # On PRs make sure that the npm package can be packaged.
