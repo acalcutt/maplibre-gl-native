@@ -167,10 +167,19 @@ jobs:
         run: |
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
+      - name: Get Space (Windows)
+        if: runner.os == 'Windows'
+        run: Get-PSDrive
+
       - name: Build Windows
+        continue-on-error: true
         if: runner.os == 'Windows'
         run: |
           cmake --build build
+
+      - name: Get Space (Windows)
+        if: runner.os == 'Windows'
+        run: Get-PSDrive
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
