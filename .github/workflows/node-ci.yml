@@ -80,6 +80,7 @@ jobs:
           fetch-depth: 0
 
       - name: Get OS Architecture
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: uname -m
 
       - name: Setup node
