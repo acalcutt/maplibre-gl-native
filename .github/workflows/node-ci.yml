@@ -73,6 +73,8 @@ jobs:
         shell: bash
 
     steps:
+      - name: Enable long file paths
+        run: git config --system core.longpaths true
       - name: Checkout
         uses: actions/checkout@v3
         with:
