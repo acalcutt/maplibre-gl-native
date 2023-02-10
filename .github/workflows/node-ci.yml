@@ -179,7 +179,6 @@ jobs:
       - name: Upload render test artifacts
         if: runner.os == 'macOS'
         uses: actions/upload-artifact@v3
-        if: always()
         with:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
