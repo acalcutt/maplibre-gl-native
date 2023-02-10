@@ -73,20 +73,17 @@ jobs:
         shell: bash
 
     steps:
-      - name: Enable long file paths
-        run: git config --system core.longpaths true
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0
 
-#      - name: Setup submodules
-#        shell: bash
-#        run: |
-#          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
-#          git submodule sync --recursive
-#          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1 || true
+      - name: Setup submodules
+        shell: bash
+        run: |
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1 || true
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -133,29 +130,22 @@ jobs:
       - name: npm ci
         run: npm ci --ignore-scripts
 
-      - name: Prepare ccache
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
-        run: ccache --clear --set-config cache_dir=~/.ccache
-
-      - name: Cache ccache
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
-        uses: actions/cache@v3
-        env:
-          cache-name: ccache-v1
-        with:
-          path: ~/.ccache
-          key: ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}-${{ github.head_ref }}
-          restore-keys: |
-            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}-${{ github.sha }}
-            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}-${{ github.ref }}
-            ${{ env.cache-name }}-${{ matrix.os }}-${{ github.job }}
-
-      - name: Clear ccache statistics
-        if: runner.os == 'MacOS' || runner.os == 'Linux'
+      - name: Update ccache
+        if: runner.os == 'Windows'
+        shell: bash
         run: |
-          ccache --zero-stats --set-config cache_dir=~/.ccache
-          ccache --max-size=2G --set-config cache_dir=~/.ccache
-          ccache --show-stats --set-config cache_dir=~/.ccache
+          choco.exe upgrade ccache
+          ccache.exe --version
+          echo "CCACHE_CONFIGPATH=C:/Users/runneradmin/AppData/Roaming/ccache/ccache.conf" >> $GITHUB_ENV
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ matrix.runs-on }}
+
+      - name: Set up msvc dev cmd (windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
 
       - name: CMake macOS
         if: runner.os == 'MacOS'
@@ -170,7 +160,7 @@ jobs:
       - name: CMake Windows
         if: runner.os == 'Windows'
         run: |
-          cmake . -B build -G Ninja -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+          cmake . -B build -G Ninja  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache.exe -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
 
       - name: Build MacOS/Linux
         if: runner.os == 'MacOS' || runner.os == 'Linux'
