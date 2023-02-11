@@ -150,8 +150,7 @@ jobs:
         run: |
           cmake . \
             -G Ninja \
-            -DCMAKE_CONFIGURATION_TYPES="${{ env.BUILDTYPE }}" \
-            -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_CONFIGURATION_TYPE="${{ env.BUILDTYPE }}" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
 
       - name: Configure maplibre-gl-native (Linux)
@@ -159,8 +158,7 @@ jobs:
         run: |
           cmake . \
             -G Ninja \
-            -DCMAKE_CONFIGURATION_TYPES="${{ env.BUILDTYPE }}" \
-            -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_CONFIGURATION_TYPE="${{ env.BUILDTYPE }}" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
             -DCMAKE_C_COMPILER="gcc-10" \
             -DCMAKE_CXX_COMPILER=g++-10
@@ -170,8 +168,7 @@ jobs:
         run: |
           cmake.exe . \
             -G Ninja \
-            -DCMAKE_CONFIGURATION_TYPES="${{ env.BUILDTYPE }}" \
-            -DCMAKE_C_COMPILER_LAUNCHER="ccache.exe" \
+            -DCMAKE_CONFIGURATION_TYPE="${{ env.BUILDTYPE }}" \
             -DCMAKE_CXX_COMPILER_LAUNCHER="ccache.exe"
 
       - name: Build maplibre-gl-native (MacOS/Linux)
