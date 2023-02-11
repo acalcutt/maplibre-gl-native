@@ -3,7 +3,7 @@
 cmake_minimum_required(VERSION 3.9)
 
 if (NOT NODE_MODULE_MINIMUM_ABI)
-    set(NODE_MODULE_MINIMUM_ABI 46) # Don't build node modules for versions earlier than Node 4
+    set(NODE_MODULE_MINIMUM_ABI 83) # Don't build node modules for versions earlier than Node 14
 endif()
 if (NOT NODE_MODULE_CACHE_DIR)
     set(NODE_MODULE_CACHE_DIR "${CMAKE_BINARY_DIR}")
