@@ -131,7 +131,6 @@ jobs:
 
       - name: Update ccache (Windows)
         if: runner.os == 'Windows'
-        shell: bash
         run: |
           choco.exe upgrade ccache
           ccache.exe --version
@@ -147,7 +146,7 @@ jobs:
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_CONFIGURATION_TYPE="${{ env.BUILDTYPE }}" \
+            -DCMAKE_CONFIGURATION_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
 
       - name: Configure maplibre-gl-native (Linux)
@@ -155,7 +154,7 @@ jobs:
         run: |
           cmake . -B build \
             -G Ninja \
-            -DCMAKE_CONFIGURATION_TYPE="${{ env.BUILDTYPE }}" \
+            -DCMAKE_CONFIGURATION_TYPE=${{ env.BUILDTYPE }} \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
             -DCMAKE_C_COMPILER=gcc-10 \
             -DCMAKE_CXX_COMPILER=g++-10
@@ -163,10 +162,10 @@ jobs:
       - name: Configure maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
         run: |
-          cmake.exe . \
+          cmake . -B build \
             -G Ninja \
-            -DCMAKE_CONFIGURATION_TYPE="${{ env.BUILDTYPE }}" \
-            -DCMAKE_CXX_COMPILER_LAUNCHER="ccache.exe"
+            -DCMAKE_CONFIGURATION_TYPE=${{ env.BUILDTYPE }} \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache.exe
 
       - name: Build maplibre-gl-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -176,7 +175,7 @@ jobs:
       - name: Build maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
         run: |
-          cmake.exe --build build
+          cmake --build build
 
       - name: Publish X64 Release to Github
         if: github.ref == 'refs/heads/main' && matrix.arch == 'x86_64'

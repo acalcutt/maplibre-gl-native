@@ -165,7 +165,10 @@ jobs:
       - name: Configure maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
         run: |
-          cmake.exe . -G Ninja -DCMAKE_CONFIGURATION_TYPE=${{ env.BUILDTYPE }} -DCMAKE_CXX_COMPILER_LAUNCHER=ccache.exe
+          cmake . -B build \
+            -G Ninja \
+            -DCMAKE_CONFIGURATION_TYPE=${{ env.BUILDTYPE }} \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache.exe
 
       - name: Build maplibre-gl-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -175,7 +178,7 @@ jobs:
       - name: Build maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
         run: |
-          cmake.exe --build build
+          cmake --build build
 
       - name: Run render tests on (MacOS)
         if: runner.os == 'MacOS'
