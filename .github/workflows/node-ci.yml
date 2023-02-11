@@ -166,7 +166,6 @@ jobs:
           cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
 
       - name: Build Windows
-        continue-on-error: true
         if: runner.os == 'Windows'
         run: |
           cmake --build build
