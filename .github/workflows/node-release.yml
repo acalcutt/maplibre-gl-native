@@ -75,6 +75,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Get Latest Version
+        run: git pull
+
       - name: Setup submodules
         shell: bash
         run: |
