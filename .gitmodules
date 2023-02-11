@@ -49,3 +49,6 @@
 [submodule "maplibre-gl-js"]
 	path = maplibre-gl-js
 	url = https://github.com/maplibre/maplibre-gl-js.git
+[submodule "platform/windows/vendor/vcpkg"]
+	path = platform/windows/vendor/vcpkg
+	url = https://github.com/microsoft/vcpkg.git

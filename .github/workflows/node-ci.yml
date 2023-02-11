@@ -60,22 +60,31 @@ jobs:
             arch: x86_64
           - runs-on: macos-12
             arch: x86_64
+          - runs-on: windows-2022
+            arch: x86_64
     continue-on-error: true
     env:
       BUILDTYPE: ${{github.ref == 'refs/heads/main' && 'Release' || 'Debug'}}
 
     defaults:
       run:
-        working-directory: ./
         shell: bash
 
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
-          submodules: recursive
           fetch-depth: 0
 
+      - name: Setup submodules
+        shell: bash
+        run: |
+          auth_header="$(git config --local --get http.https://github.com/.extraheader)"
+          git submodule sync --recursive
+          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1 || true
+
       - name: Get OS Architecture
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: uname -m
 
       - name: Setup node
@@ -116,16 +125,59 @@ jobs:
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
 
-      - name: npm build
-        run: npm run build
+      - name: npm ci
+        run: npm ci --ignore-scripts
+
+      - name: Update ccache
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          choco.exe upgrade ccache
+          ccache.exe --version
+          echo "CCACHE_CONFIGPATH=C:/Users/runneradmin/AppData/Roaming/ccache/ccache.conf" >> $GITHUB_ENV
+
+      - name: Set up ccache
+        uses: hendrikmuhs/ccache-action@v1
+        with:
+          key: ${{ matrix.runs-on }}
+
+      - name: Set up msvc dev cmd (windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: CMake macOS
+        if: runner.os == 'MacOS'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+
+      - name: CMake Linux
+        if: runner.os == 'Linux'
+        run: |
+          cmake . -B build -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} -DCMAKE_C_COMPILER=gcc-10 -DCMAKE_CXX_COMPILER=g++-10
+
+      - name: CMake Windows
+        if: runner.os == 'Windows'
+        run: |
+          cmake . -B build -G Ninja  -DCMAKE_CXX_COMPILER_LAUNCHER=ccache.exe -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }}
+
+      - name: Build MacOS/Linux
+        if: runner.os == 'MacOS' || runner.os == 'Linux'
+        run: |
+          cmake --build build -j $(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null)
+
+      - name: Build Windows
+        continue-on-error: true
+        if: runner.os == 'Windows'
+        run: |
+          cmake --build build
 
       - name: Run render tests on macOS
         if: runner.os == 'macOS'
         run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
       - name: Upload render test artifacts
+        if: runner.os == 'macOS'
         uses: actions/upload-artifact@v3
-        if: always()
         with:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html

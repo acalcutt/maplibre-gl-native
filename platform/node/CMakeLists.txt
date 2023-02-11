@@ -1,14 +1,15 @@
-if(EXISTS ${PROJECT_SOURCE_DIR}/node_modules/@mapbox/cmake-node-module/module.cmake)
-    set(CMAKE_NODE_MODULE ${PROJECT_SOURCE_DIR}/node_modules/@mapbox/cmake-node-module/module.cmake)
-elseif(EXISTS ${PROJECT_SOURCE_DIR}/../../../node_modules/@mapbox/cmake-node-module/module.cmake)
-    set(CMAKE_NODE_MODULE ${PROJECT_SOURCE_DIR}/../../../node_modules/@mapbox/cmake-node-module/module.cmake)
+if(WIN32)
+    set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/node_bindings)
+    include(${CMAKE_CURRENT_LIST_DIR}/cmake/module.windows.cmake)
 else()
-    message(WARNING "Not building node bindings in , dependencies not found. Run 'npm update'.")
-    return()
-endif()
+    if(NOT EXISTS ${PROJECT_SOURCE_DIR}/node_modules/@mapbox/cmake-node-module/module.cmake)
+        message(WARNING "Not building node bindings, dependencies not found. Run 'npm update'.")
+        return()
+    endif()
 
-set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/headers)
-include(${CMAKE_NODE_MODULE})
+    set(NODE_MODULE_CACHE_DIR ${CMAKE_SOURCE_DIR}/build/headers)
+    include(${PROJECT_SOURCE_DIR}/node_modules/@mapbox/cmake-node-module/module.cmake)
+endif()
 
 add_node_module(
     mbgl-node
@@ -21,8 +22,13 @@ add_node_module(
         51
         111
 )
-find_package(PkgConfig REQUIRED)
-pkg_search_module(LIBUV libuv REQUIRED)
+
+if(WIN32)
+    find_package(LIBUV REQUIRED)
+else()
+    find_package(PkgConfig REQUIRED)
+    pkg_search_module(LIBUV libuv REQUIRED)
+endif()
 
 add_library(mbgl-node-loop STATIC)
 
