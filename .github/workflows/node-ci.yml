@@ -87,8 +87,8 @@ jobs:
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: uname -m
 
-      - name: Install dependencies macOS
-        if: runner.os == 'macOS'
+      - name: Install dependencies (MacOS)
+        if: runner.os == 'MacOS'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
@@ -100,7 +100,7 @@ jobs:
           brew list glfw || brew install glfw
           brew list libuv || brew install libuv
 
-      - name: Install dependencies Linux
+      - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         env:
           DEBIAN_FRONTEND: noninteractive
@@ -148,7 +148,7 @@ jobs:
       - name: Configure maplibre-gl-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
-          cmake.exe . \
+          cmake . \
             -G Ninja \
             -DCMAKE_CONFIGURATION_TYPES="${{ env.BUILDTYPE }}" \
             -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
@@ -157,7 +157,7 @@ jobs:
       - name: Configure maplibre-gl-native (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake.exe . \
+          cmake . \
             -G Ninja \
             -DCMAKE_CONFIGURATION_TYPES="${{ env.BUILDTYPE }}" \
             -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
@@ -184,23 +184,23 @@ jobs:
         run: |
           cmake --build build
 
-      - name: Run render tests on macOS
-        if: runner.os == 'macOS'
+      - name: Run render tests on (MacOS)
+        if: runner.os == 'MacOS'
         run: ./build/mbgl-render-test-runner --manifestPath metrics/macos-xcode11-release-style.json
 
-      - name: Upload render test artifacts
-        if: runner.os == 'macOS'
+      - name: Upload render test artifacts (MacOS)
+        if: runner.os == 'MacOS'
         uses: actions/upload-artifact@v3
         with:
           name: render-query-test-results
           path: metrics/macos-xcode11-release-style.html
 
-      - name: Test
+      - name: Test (Linux)
         if: runner.os == 'Linux'
         run: xvfb-run --auto-servernum npm test
 
-      - name: Test
-        if: runner.os == 'macOS'
+      - name: Test (MacOS)
+        if: runner.os == 'MacOS'
         run: npm test
 
       # On PRs make sure that the npm package can be packaged.
