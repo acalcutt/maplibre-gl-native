@@ -179,7 +179,7 @@ jobs:
       - name: Build maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
         run: |
-          cmake --build build
+          cmake.exe --build build
 
       - name: Run render tests on (MacOS)
         if: runner.os == 'MacOS'

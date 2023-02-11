@@ -176,7 +176,7 @@ jobs:
       - name: Build maplibre-gl-native (Windows)
         if: runner.os == 'Windows'
         run: |
-          cmake --build build
+          cmake.exe --build build
 
       - name: Publish X64 Release to Github
         if: github.ref == 'refs/heads/main' && matrix.arch == 'x86_64'
