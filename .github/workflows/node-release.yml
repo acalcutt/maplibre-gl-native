@@ -84,8 +84,8 @@ jobs:
         if: runner.os == 'MacOS' || runner.os == 'Linux'
         run: uname -m
 
-      - name: Install dependencies (macOS)
-        if: runner.os == 'macOS'
+      - name: Install dependencies (MacOS)
+        if: runner.os == 'MacOS'
         env:
           HOMEBREW_NO_AUTO_UPDATE: 1
           HOMEBREW_NO_INSTALL_CLEANUP: 1
@@ -117,10 +117,6 @@ jobs:
             libc++abi-9-dev
           /usr/sbin/update-ccache-symlinks
 
-      - name: Set up msvc dev cmd (Windows)
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1
-
       - name: Setup node
         uses: actions/setup-node@v3
         with:
@@ -129,7 +125,11 @@ jobs:
       - name: npm ci
         run: npm ci --ignore-scripts
 
-      - name: Update ccache
+      - name: Set up msvc dev cmd (Windows)
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Update ccache (Windows)
         if: runner.os == 'Windows'
         shell: bash
         run: |
@@ -145,19 +145,19 @@ jobs:
       - name: Configure maplibre-gl-native (MacOS)
         if: runner.os == 'MacOS'
         run: |
-          cmake . \
+          cmake . -B build \
             -G Ninja \
             -DCMAKE_CONFIGURATION_TYPE="${{ env.BUILDTYPE }}" \
-            -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
 
       - name: Configure maplibre-gl-native (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake . \
+          cmake . -B build \
             -G Ninja \
             -DCMAKE_CONFIGURATION_TYPE="${{ env.BUILDTYPE }}" \
-            -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
-            -DCMAKE_C_COMPILER="gcc-10" \
+            -DCMAKE_CXX_COMPILER_LAUNCHER=ccache \
+            -DCMAKE_C_COMPILER=gcc-10 \
             -DCMAKE_CXX_COMPILER=g++-10
 
       - name: Configure maplibre-gl-native (Windows)
