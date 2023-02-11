@@ -1,11 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 33
+    compileSdkVersion androidVersions.compileSdkVersion
+    ndkVersion androidSdkVersions.ndkVersion
+    buildToolsVersion androidSdkVersions.buildToolsVersion
 
     defaultConfig {
         applicationId = 'com.mapbox.mapboxsdk.maps.benchmark_runner'
-        minSdkVersion 14
+        minSdkVersion 21
         targetSdkVersion 33
         def abi = 'all'
         if (project.hasProperty('mapbox.abis')) {
@@ -32,7 +34,7 @@ android {
     }
     externalNativeBuild {
         cmake {
-            version '3.10.2'
+            version androidSdkVersions.cmakeVersion
             path '../../../CMakeLists.txt'
         }
     }

@@ -22,7 +22,7 @@ import timber.log.Timber.DebugTree
  * Initialises components as LeakCanary, Strictmode, Timber and Mapbox
  *
  */
-class MapLibreApplication : MultiDexApplication() {
+open class MapLibreApplication : MultiDexApplication() {
     override fun onCreate() {
         super.onCreate()
         initializeLogger()
@@ -57,7 +57,9 @@ class MapLibreApplication : MultiDexApplication() {
 
     private fun initializeMapbox() {
         val apiKey = ApiKeyUtils.getApiKey(applicationContext)
-        validateApiKey(apiKey)
+        if (apiKey != null) {
+            validateApiKey(apiKey)
+        }
         Mapbox.getInstance(applicationContext, apiKey, TILE_SERVER)
         TileLoadingMeasurementUtils.setUpTileLoadingMeasurement()
         MapStrictMode.setStrictModeEnabled(true)
