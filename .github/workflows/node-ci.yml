@@ -60,6 +60,8 @@ jobs:
             arch: x86_64
           - runs-on: macos-12
             arch: x86_64
+          - runs-on: macos-12-arm
+            arch: arm64
           - runs-on: windows-2022
             arch: x86_64
     continue-on-error: true
@@ -68,6 +70,7 @@ jobs:
 
     defaults:
       run:
+        working-directory: ./
         shell: bash
 
     steps:
@@ -81,7 +84,7 @@ jobs:
         run: |
           auth_header="$(git config --local --get http.https://github.com/.extraheader)"
           git submodule sync --recursive
-          git -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive --depth=1 || true
+          git -c core.longpaths=true -c "http.extraheader=$auth_header" -c protocol.version=2 submodule update --init --force --recursive || true
 
       - name: Get OS Architecture
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -168,7 +171,13 @@ jobs:
           cmake . -B build \
             -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILDTYPE }} \
+            -DMBGL_WITH_OSMESA=ON \
             -DCMAKE_CXX_COMPILER_LAUNCHER=ccache.exe
+
+      - name: Get disk space before build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Get-PSDrive -PSProvider FileSystem
 
       - name: Build maplibre-gl-native (MacOS/Linux)
         if: runner.os == 'MacOS' || runner.os == 'Linux'
@@ -179,6 +188,11 @@ jobs:
         if: runner.os == 'Windows'
         run: |
           cmake --build build
+
+      - name: Get disk space after build (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: Get-PSDrive -PSProvider FileSystem
 
       - name: Run render tests on (MacOS)
         if: runner.os == 'MacOS'
@@ -198,6 +212,13 @@ jobs:
       - name: Test (MacOS)
         if: runner.os == 'MacOS'
         run: npm test
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          wmic path win32_VideoController get name
+          npm test
 
       # On PRs make sure that the npm package can be packaged.
       - name: Pack
