@@ -116,7 +116,11 @@ ParseError)JS").ToLocalChecked()).ToLocalChecked();
 
     Nan::SetPrototypeMethod(tpl, "dumpDebugLogs", DumpDebugLogs);
     Nan::SetPrototypeMethod(tpl, "queryRenderedFeatures", QueryRenderedFeatures);
+#if defined NODE_MODULE_VERSION && NODE_MODULE_VERSION < 93
     v8::Local<v8::Context> context = target->CreationContext();
+#else
+    v8::Local<v8::Context> context = target->GetCreationContext().ToLocalChecked();
+#endif
 
     constructor.Reset(tpl->GetFunction(context).ToLocalChecked());
     Nan::Set(target, Nan::New("Map").ToLocalChecked(), tpl->GetFunction(context).ToLocalChecked());
@@ -192,7 +196,7 @@ void NodeMap::New(const Nan::FunctionCallbackInfo<v8::Value>& info) {
     info.This()->SetInternalField(1, options);
 
     mbgl::FileSourceManager::get()->registerFileSourceFactory(
-        mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions& clientOptions) {
+        mbgl::FileSourceType::ResourceLoader, [](const mbgl::ResourceOptions& resourceOptions, const mbgl::ClientOptions&) {
             return std::make_unique<node_mbgl::NodeFileSource>(
                 reinterpret_cast<node_mbgl::NodeMap*>(resourceOptions.platformContext()));
         });
