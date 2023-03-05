@@ -29,7 +29,7 @@ jobs:
           password: ${{ secrets.CR_PAT }}
 
       - name: Build and push node-builder image
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v4
         with:
           context: .
           platforms: linux/arm64
