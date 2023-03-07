@@ -41,8 +41,7 @@ struct NodeMap::RenderOptions {
     double pitch = 0;
     double latitude = 0;
     double longitude = 0;
-    unsigned int width = 512;
-    unsigned int height = 512;
+    mbgl::Size size = { 512, 512 };
     bool axonometric = false;
     double xSkew = 0;
     double ySkew = 1;
