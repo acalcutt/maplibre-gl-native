@@ -465,26 +465,11 @@ void NodeMap::startRender(const NodeMap::RenderOptions& options) {
     frontend->setSize(options.size);
     map->setSize(options.size);
 
-    if (map->getZoom() != options.zoom) {
-        map->setZoom(options.zoom);
-    }
-
-    mbgl::LatLng latLng(options.latitude, options.longitude);
-    if (map->getLatLng() != latLng) {
-        map->setLatLng(latLng);
-    }
-
-    if (map->getBearing() != options.bearing) {
-        map->setBearing(options.bearing);
-    }
-
-    if (map->getPitch() != options.pitch) {
-        map->setPitch(options.pitch);
-    }
-
-    if (map->getDebug() != options.debugOptions) {
-        map->setDebug(options.debugOptions);
-    }
+    mbgl::CameraOptions camera;
+    camera.center = mbgl::LatLng { options.latitude, options.longitude };
+    camera.zoom = options.zoom;
+    camera.bearing = options.bearing;
+    camera.pitch = options.pitch;
 
     auto projectionOptions = mbgl::ProjectionMode()
         .withAxonometric(options.axonometric)
