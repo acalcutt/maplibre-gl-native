@@ -41,7 +41,8 @@ struct NodeMap::RenderOptions {
     double pitch = 0;
     double latitude = 0;
     double longitude = 0;
-    mbgl::Size size = { 512, 512 };
+    unsigned int width = 512;
+    unsigned int height = 512;
     bool axonometric = false;
     double xSkew = 0;
     double ySkew = 1;
@@ -464,11 +465,26 @@ void NodeMap::startRender(const NodeMap::RenderOptions& options) {
     frontend->setSize(options.size);
     map->setSize(options.size);
 
-    mbgl::CameraOptions camera;
-    camera.center = mbgl::LatLng { options.latitude, options.longitude };
-    camera.zoom = options.zoom;
-    camera.bearing = options.bearing;
-    camera.pitch = options.pitch;
+    if (map->getZoom() != options.zoom) {
+        map->setZoom(options.zoom);
+    }
+
+    mbgl::LatLng latLng(options.latitude, options.longitude);
+    if (map->getLatLng() != latLng) {
+        map->setLatLng(latLng);
+    }
+
+    if (map->getBearing() != options.bearing) {
+        map->setBearing(options.bearing);
+    }
+
+    if (map->getPitch() != options.pitch) {
+        map->setPitch(options.pitch);
+    }
+
+    if (map->getDebug() != options.debugOptions) {
+        map->setDebug(options.debugOptions);
+    }
 
     auto projectionOptions = mbgl::ProjectionMode()
         .withAxonometric(options.axonometric)
